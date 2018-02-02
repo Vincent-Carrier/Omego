@@ -11,6 +11,7 @@ const val EMPTY: Byte = -1
 const val BLACK: Byte = 0
 const val WHITE: Byte = 1
 
+@Target(AnnotationTarget.TYPE)
 @ByteDef(EMPTY, BLACK, WHITE)
 annotation class MaybeStone
 

@@ -308,7 +308,6 @@ public class ZoomView extends FrameLayout {
     lastd = d;
     final float ld = Math.abs(d - startd);
 
-    Math.atan2(y2 - y1, x2 - x1);
     switch (ev.getAction()) {
       case MotionEvent.ACTION_DOWN:
         startd = d;

@@ -32,14 +32,14 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
     boardRect = square(left, top, (0.9 * width).toInt())
     gridPadding = boardRect.width() / 10
     gridRect = square(left + gridPadding, top + gridPadding, boardRect.width() - gridPadding * 2)
-    gridSpace = gridRect.width() / game.board.grid.size
+    gridSpace = gridRect.width() / game.board.size
   }
 
   @SuppressLint("ClickableViewAccessibility")
   override fun onTouchEvent(event: MotionEvent): Boolean {
     when (event.action) {
       ACTION_UP -> {
-        if (game.playTurn(pixelToCoordinate(x, y))) postInvalidate()
+        if (game.isHumansTurn() && game.playTurn(pixelToCoordinate(x, y))) invalidate()
       }
     }
     return true
@@ -68,7 +68,7 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
         }
       }
 
-      game.board.grid.forEachIndexed { y, row ->
+      game.board.grid().forEachIndexed { y, row ->
         row.forEachIndexed { x, maybeStone ->
           if (maybeStone.isNotEmpty()) drawCircle(
               coordinateToPixelX(x),
