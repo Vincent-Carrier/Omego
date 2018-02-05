@@ -26,4 +26,5 @@ android {
 dependencies {
     implementation libraries.core
     implementation libraries.ui
+    implementation 'com.android.support:support-v4:27.0.2'
 }

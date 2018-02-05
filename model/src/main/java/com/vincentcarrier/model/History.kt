@@ -10,11 +10,11 @@ class GoStack<E> : Stack<E>() {
   val last: E
     get() {
       @Suppress("UNCHECKED_CAST")
-      return elementData[-1] as E
+      return elementData[lastIndex - 1] as E
     }
 }
 
 data class Moment(
     val turn: Turn,
-    val grid: Grid
+    val board: Board
 )

@@ -4,17 +4,19 @@ import com.vincentcarrier.model.GameState.BLACK_WIN
 import com.vincentcarrier.model.GameState.ONGOING
 import com.vincentcarrier.model.GameState.WHITE_WIN
 import com.vincentcarrier.model.PlayerType.HUMAN
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 
 class Game(
-    size: Int = 19,
+    val board: Board = Board(),
     blackPlayerType: PlayerType = HUMAN,
     whitePlayerType: PlayerType = HUMAN,
     private val komi: Float = 6.5f, // White's compensation for playing second
     private val handicap: Int = 0 // Number of stones black can place at the beginning
 ) {
 
-  val board = Board(size)
+  private val logger = AnkoLogger<Board>()
 
   var gameState = ONGOING
     private set
@@ -29,14 +31,16 @@ class Game(
 
   fun isHumansTurn() = activePlayer.type == HUMAN
 
-  fun playTurn(c: Coordinate) = playTurn(Move(c, activePlayer.color))
+  fun playMove(x: Int, y: Int) = playTurn(Move(Coordinate(x, y), activePlayer.color))
+
+  fun playMove(c: Coordinate) = playTurn(Move(c, activePlayer.color))
 
   /**
   * @return true if turn was played or false if move was illegal
   */
   private fun playTurn(turn: Turn): Boolean {
     when (turn) {
-      is Move -> if (isMoveLegal(turn)) board.placeStone(turn) else return false
+      is Move -> if (isMoveLegal(turn)) board.executeMove(turn) else return false
       Pass -> if (history.peek().turn == Pass) gameOver() // The game ends when both players are out of good moves
       Resign -> {
         gameState = when (activePlayer.color) {
@@ -46,21 +50,21 @@ class Game(
         }
       }
     }
-
-    history.push(Moment(turn, board.grid))
+    history.push(Moment(turn, board))
+    logger.info("$turn was played")
     return true
   }
 
   private fun isMoveLegal(move: Move): Boolean {
     fun koRuleIsRespected(move: Move): Boolean {
       // A player is note allowed to play a move that would continue an infinite back and forth
-      return !(history.last.grid contentEquals board.simulateMove(move).grid)
+      return history.last.board != board.simulateMove(move)
     }
 
     return  with(board) { isWithinBoard(move.c)
                        && isEmptyAt(move.c)
                        && !isSuicide(move) }
-                       && koRuleIsRespected(move)
+//                       && koRuleIsRespected(move)
   }
 
   private fun gameOver() {

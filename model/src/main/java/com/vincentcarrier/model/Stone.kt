@@ -7,9 +7,9 @@ import kotlin.annotation.AnnotationTarget.ANNOTATION_CLASS
 @Target(ANNOTATION_CLASS)
 annotation class ByteDef(vararg val value: Byte = [])
 
-const val EMPTY: Byte = -1
-const val BLACK: Byte = 0
-const val WHITE: Byte = 1
+const val EMPTY: Byte = 0
+const val BLACK: Byte = 1
+const val WHITE: Byte = 2
 
 @Target(AnnotationTarget.TYPE)
 @ByteDef(EMPTY, BLACK, WHITE)
@@ -19,9 +19,12 @@ annotation class MaybeStone
 @ByteDef(BLACK, WHITE)
 annotation class Stone
 
-fun Byte.isBlack() = this == BLACK
-
-fun Byte.isWhite() = this == WHITE
-
 fun Byte.isNotEmpty() = this != EMPTY
+
+internal val @Stone Byte.opposite: Byte
+  get() = when (this) {
+    WHITE -> BLACK
+    BLACK -> WHITE
+    else -> throw IllegalArgumentException("No opposite for empty coordinate")
+  }
 

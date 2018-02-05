@@ -3,56 +3,63 @@ package com.vincentcarrier.omego.boardview
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.TypedValue
+import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
-import android.view.MotionEvent.ACTION_UP
 import android.view.View
+import com.vincentcarrier.model.BLACK
+import com.vincentcarrier.model.Board
 import com.vincentcarrier.model.Coordinate
-import com.vincentcarrier.model.Game
-import com.vincentcarrier.model.isBlack
 import com.vincentcarrier.model.isNotEmpty
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import kotlin.math.roundToInt
 
 
 class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
 
-  lateinit var game: Game
-  private var theme = Theme()
+  private val logger = AnkoLogger<BoardView>()
 
+  lateinit var board: Board
+
+  private var theme = BoardTheme()
   private lateinit var boardRect: Rect
   private lateinit var gridRect: Rect
   private var gridSpace = 0
   private var gridPadding = 0
 
+  private val tapDetector = object : SimpleOnGestureListener() {
+    override fun onDown(e: MotionEvent) = true
+    override fun onSingleTapUp(e: MotionEvent): Boolean {
+      logger.info("onSingleTapUp()")
+      return true
+    }
+  }
 
   override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-    boardRect = square(left, top, (0.9 * width).toInt())
+    boardRect = square(left, top, (0.9 * height).toInt())
     gridPadding = boardRect.width() / 10
     gridRect = square(left + gridPadding, top + gridPadding, boardRect.width() - gridPadding * 2)
-    gridSpace = gridRect.width() / game.board.size
+    gridSpace = gridRect.width() / board.size
   }
 
   @SuppressLint("ClickableViewAccessibility")
   override fun onTouchEvent(event: MotionEvent): Boolean {
-    when (event.action) {
-      ACTION_UP -> {
-        if (game.isHumansTurn() && game.playTurn(pixelToCoordinate(x, y))) invalidate()
-      }
-    }
-    return true
+    tapDetector.onSingleTapUp(event)
+    return super.onTouchEvent(event)
   }
 
   override fun onDraw(canvas: Canvas) {
     with(canvas) {
       theme.drawBackground(this)
+
+      // Draw the board
       drawRect(boardRect, theme.boardPaint)
 
+      // Draw the board
       if (theme.gridPaint != null) {
-        // Draw the grid
-        (0 until game.board.size).forEach { position ->
+        (0 until board.size).forEach { position ->
           drawHorizontalLine( // draw
               gridRect.left,
               gridRect.top + gridSpace * position,
@@ -68,14 +75,16 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
         }
       }
 
-      game.board.grid().forEachIndexed { y, row ->
+      // Draw the stones
+      board.grid().forEachIndexed { y, row ->
         row.forEachIndexed { x, maybeStone ->
-          if (maybeStone.isNotEmpty()) drawCircle(
+          if (maybeStone.isNotEmpty())
+            drawCircle(
               coordinateToPixelX(x),
               coordinateToPixelY(y),
               0.4f * gridSpace,
-              if (maybeStone.isBlack()) theme.blackStonePaint else theme.whiteStonePaint
-          )
+              if (maybeStone == BLACK) theme.blackStonePaint else theme.whiteStonePaint
+            )
         }
       }
     }
@@ -85,23 +94,8 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
 
   private fun coordinateToPixelY(y: Int) = (boardRect.top + gridPadding + y * gridSpace).toFloat()
 
-  private fun pixelToCoordinate(x: Float, y: Float): Coordinate {
+  internal fun pixelToCoordinate(x: Float, y: Float): Coordinate {
     return Coordinate(((x - boardRect.left - gridPadding)/gridSpace).roundToInt(),
                       ((y - boardRect.top - gridPadding)/gridSpace).roundToInt())
   }
 }
-
-fun square(l: Int, t: Int, w: Int) = Rect(l, t, l+w, t+w)
-
-fun Canvas.drawHorizontalLine(l: Int, t: Int, width: Int, paint: Paint) {
-  drawLine(l.toFloat(), t.toFloat(), (l + width).toFloat(), t.toFloat(), paint)
-}
-
-fun Canvas.drawVerticalLine(l: Int, t: Int, height: Int, paint: Paint) {
-  drawLine(l.toFloat(), t.toFloat(), l.toFloat(), (t + height).toFloat(), paint)
-}
-
-private fun View.dp(px: Float) = px / (resources.displayMetrics.densityDpi / 160f)
-
-private fun View.px(dp: Float) =
-    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics)

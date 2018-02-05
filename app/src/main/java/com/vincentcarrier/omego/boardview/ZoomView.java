@@ -157,7 +157,7 @@ public class ZoomView extends FrameLayout {
     return listener;
   }
 
-  public void setListner(final ZoomViewListener listener) {
+  public void setListener(final ZoomViewListener listener) {
     this.listener = listener;
   }
 
@@ -178,7 +178,7 @@ public class ZoomView extends FrameLayout {
 
     // // double touch
     if (ev.getPointerCount() == 2) {
-      processDoubleTouchEvent(ev);
+      return false;
     }
 
     // redraw
