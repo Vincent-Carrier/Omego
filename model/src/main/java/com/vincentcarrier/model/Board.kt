@@ -145,18 +145,18 @@ class Board(
   private fun isContiguous(group: Coordinates) = group(group[0]) == group
 
   override fun toString(): String {
-    val s = StringBuilder()
-    s.appendln()
+    val sb = StringBuilder()
+    sb.appendln()
     grid.forEach {
       it.forEach {
         when (it) {
-          WHITE -> s.append('W')
-          BLACK -> s.append('B')
-          EMPTY -> s.append('O')
+          WHITE -> sb.append('W')
+          BLACK -> sb.append('B')
+          EMPTY -> sb.append('O')
         }
       }
-      s.appendln()
+      sb.appendln()
     }
-    return s.toString()
+    return sb.toString()
   }
 }

@@ -13,7 +13,6 @@ import com.vincentcarrier.model.Board
 import com.vincentcarrier.model.Coordinate
 import com.vincentcarrier.model.isNotEmpty
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import kotlin.math.roundToInt
 
 
@@ -31,10 +30,7 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
 
   private val tapDetector = object : SimpleOnGestureListener() {
     override fun onDown(e: MotionEvent) = true
-    override fun onSingleTapUp(e: MotionEvent): Boolean {
-      logger.info("onSingleTapUp()")
-      return true
-    }
+    override fun onSingleTapUp(e: MotionEvent) = true
   }
 
   override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
