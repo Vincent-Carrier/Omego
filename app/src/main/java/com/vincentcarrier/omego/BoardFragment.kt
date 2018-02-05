@@ -38,7 +38,8 @@ class BoardFragment : Fragment() {
         board = vm.game.board
         setOnTouchListener { _, event ->
           val c = pixelToCoordinate(event.x, event.y)
-          if (vm.game.playMove(c)) invalidate()
+          // && is lazily evaluated, so a bot can't submit a move through the UI
+          if (vm.game.isHumansTurn() && vm.game.submitMove(c).isLegal) invalidate()
           true
         }
       }

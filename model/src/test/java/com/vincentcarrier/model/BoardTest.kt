@@ -1,5 +1,6 @@
 package com.vincentcarrier.model
 
+import io.kotlintest.matchers.shouldBe
 import io.kotlintest.matchers.shouldEqual
 import io.kotlintest.properties.forAll
 import io.kotlintest.properties.headers
@@ -41,12 +42,23 @@ class BoardTest : StringSpec() {
       board1.liberties(topWhiteGroup).toSet() shouldEqual topWhiteLiberties.toSet()
     }
 
-    "isSuicide() should return true for suicide move" {
-      board1.isSuicide(Move(0,2, WHITE)) shouldEqual true
+    "executeMove() should remove captured stones" {
+      board2.executeMove(Move(4,0, BLACK))
+      (board2.grid()[0][4] == BLACK) shouldBe true
+      board2.isEmptyAt(3 to 0) shouldBe true
+      board2.isEmptyAt(4 to 1) shouldBe true
     }
 
-    "isSuicide() should return false if surrounding group is surrounded" {
-      board2.isSuicide(Move(4,0, BLACK)) shouldEqual false
+    "isSuicide() should return true for suicide move, false otherwise" {
+      val table = table(
+          headers("board", "move", "result"),
+          row(board1, Move(0 to 2, WHITE), true),
+          row(board2, Move(4 to 0, BLACK), false)
+      )
+
+      forAll(table) { board, move, result ->
+        board.isSuicide(move) shouldEqual result
+      }
     }
 
     "atari() should return true if group is in atari" {
@@ -62,10 +74,13 @@ class BoardTest : StringSpec() {
       }
     }
 
-    "executeMove() should remove captured stones" {
-      board2.executeMove(Move(4,0, BLACK))
-      board2.isEmptyAt(3 to 0) shouldEqual true
-      board2.isEmptyAt(4 to 1) shouldEqual true
+
+
+    "simulateMove() should create a new board and execute the given move" {
+//      val virtualBoard = board1.simulateMove(Move(2 to 0, WHITE))
+//      virtualBoard shouldNotBe board1
+//      println(virtualBoard)
+//      println(board1)
     }
   }
 }

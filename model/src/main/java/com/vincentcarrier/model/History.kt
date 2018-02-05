@@ -7,10 +7,14 @@ typealias History = GoStack<Moment>
 
 class GoStack<E> : Stack<E>() {
   // TODO: Fix access leak
-  val last: E
+  val last: E?
     get() {
-      @Suppress("UNCHECKED_CAST")
-      return elementData[lastIndex - 1] as E
+      try {
+        @Suppress("UNCHECKED_CAST")
+        return elementData[lastIndex - 1] as E
+      } catch (e: ArrayIndexOutOfBoundsException) {
+        return null
+      }
     }
 }
 

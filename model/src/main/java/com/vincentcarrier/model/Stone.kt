@@ -25,6 +25,6 @@ internal val @Stone Byte.opposite: Byte
   get() = when (this) {
     WHITE -> BLACK
     BLACK -> WHITE
-    else -> throw IllegalArgumentException("No opposite for empty coordinate")
+    else -> EMPTY
   }
 

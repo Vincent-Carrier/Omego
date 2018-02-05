@@ -11,8 +11,8 @@ typealias Coordinates = List<Coordinate>
 
 internal fun Coordinates.toString(size: Int): String {
   val sb = StringBuilder()
-  (0..size).forEach { y ->
-    (0..size).forEach { x ->
+  (0 until size).forEach { y ->
+    (0 until size).forEach { x ->
       if (this.contains(x to y)) sb.append('X') else sb.append('O')
     }
     sb.appendln()

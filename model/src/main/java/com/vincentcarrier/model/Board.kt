@@ -1,9 +1,11 @@
 package com.vincentcarrier.model
 
+import java.util.Arrays
+
 
 typealias Grid = Array<ByteArray>
 
-class Board(
+data class Board(
     val size: Int = 19,
     private val grid: Grid = Array(size) { ByteArray(size) { EMPTY } }
 ) {
@@ -31,15 +33,19 @@ class Board(
     }
   }
 
-  fun grid() = grid.clone() // Prevent other modules from modifying the board
+  fun grid() = grid.clone() // Prevent other modules from modifying the grid's content
 
   fun group(c: Coordinate): Coordinates {
+    fun sameColorAdjacent(c: Coordinate): Coordinates {
+      return adjacentCoordinates(c).filter { c isSameColorAs it }
+    }
+
     if (isEmptyAt(c)) throw IllegalArgumentException("This coordinate is empty")
     var group = setOf(c)
     var prevSize = 0
     while (group.size > prevSize) {
       prevSize = group.size
-      group.forEach { group = group.plus(sameColorAdjacent(it)) }
+      group.forEach { group = group + sameColorAdjacent(it) }
     }
 
     return group.toList()
@@ -61,21 +67,35 @@ class Board(
 
   internal fun isEmptyAt(c: Coordinate) = get(c) == EMPTY
 
-  internal fun executeMove(move: Move) {
+  internal fun executeMove(move: Move): Coordinates {
+    fun removeStones(coordinates: Coordinates) {
+      coordinates.forEach {
+        grid[it.y][it.x] = EMPTY
+      }
+    }
+
     placeStone(move)
     // Remove any captured stones
+    val removedStones = mutableListOf<Coordinate>()
     oppositeColorAdjacent(move.c).forEach {
-      if (it.isSurrounded()) removeStones(group(it))
+      val group = group(it)
+      if (group.isSurrounded()) removeStones(group); removedStones += group
     }
+
+    return removedStones
   }
 
-  internal fun simulateMove(move: Move) = Board(size, grid).apply { placeStone(move) }
+  internal fun simulateMove(move: Move, checkCondition: (Board) -> Boolean): Boolean {
+    val virtualBoard = copy(size, grid).apply { placeStone(move) }
+
+    return checkCondition(virtualBoard)
+  }
 
   internal fun isSuicide(move: Move): Boolean {
-    with(simulateMove(move)) {
+    return simulateMove(move) {
       val group = group(move.c)
       // If the group surrounding the inner group is itself surrounded, then the move is not suicide
-      return if (group.isSurrounded()) !(surroundingGroups(group).isSurrounded()) else false
+      if (!group.isSurrounded()) false else !(surroundingGroups(group).isSurrounded())
     }
   }
 
@@ -92,21 +112,10 @@ class Board(
 
   private fun placeStone(move: Move) = placeStone(move.c, move.color)
 
-  private fun removeStone(c: Coordinate) {
-    grid[c.y][c.x] = EMPTY
-  }
-
-  private fun removeStones(coordinates: Coordinates) {
-    coordinates.forEach {
-      removeStone(it)
-    }
-  }
-
-  private fun onlyWithinBoard(coordinates: Coordinates): Coordinates {
-    return coordinates.filter { isWithinBoard(it) }
-  }
-
   private fun adjacentCoordinates(c: Coordinate): Coordinates {
+    fun onlyWithinBoard(coordinates: Coordinates): Coordinates {
+      return coordinates.filter { isWithinBoard(it) }
+    }
     // top, right, down, left
     return onlyWithinBoard(listOf(
         c.x to c.y - 1,
@@ -121,10 +130,6 @@ class Board(
   private infix fun Coordinate.isSameColorAs(c: Coordinate) = get(this) == get(c)
 
   private infix fun Coordinate.isOppositeColorOf(c: Coordinate) = get(this) == get(c).opposite
-
-  private fun sameColorAdjacent(c: Coordinate): Coordinates {
-    return adjacentCoordinates(c).filter { c isSameColorAs it }
-  }
 
   private fun oppositeColorAdjacent(c: Coordinate): Coordinates {
     return adjacentCoordinates(c).filter { c isOppositeColorOf it }
@@ -158,5 +163,23 @@ class Board(
       sb.appendln()
     }
     return sb.toString()
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as Board
+
+    if (size != other.size) return false
+    if (!Arrays.equals(grid, other.grid)) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = size
+    result = 31 * result + Arrays.hashCode(grid)
+    return result
   }
 }

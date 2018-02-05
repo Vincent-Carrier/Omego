@@ -7,6 +7,9 @@ data class Player(
 ) {
   var score: Float = 0f
     internal set
+
+  var prisoners = 0
+    internal set
 }
 
 enum class PlayerType {
