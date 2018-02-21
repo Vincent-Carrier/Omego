@@ -1,5 +1,8 @@
 package com.vincentcarrier.model
 
+import com.vincentcarrier.model.Board.Companion.BLACK
+import com.vincentcarrier.model.Board.Companion.EMPTY
+import com.vincentcarrier.model.Board.Companion.WHITE
 import kotlin.annotation.AnnotationRetention.SOURCE
 import kotlin.annotation.AnnotationTarget.ANNOTATION_CLASS
 
@@ -7,19 +10,15 @@ import kotlin.annotation.AnnotationTarget.ANNOTATION_CLASS
 @Target(ANNOTATION_CLASS)
 annotation class ByteDef(vararg val value: Byte = [])
 
-const val EMPTY: Byte = 0
-const val BLACK: Byte = 1
-const val WHITE: Byte = 2
-
 @Target(AnnotationTarget.TYPE)
 @ByteDef(EMPTY, BLACK, WHITE)
-annotation class MaybeStone
+annotation class StoneOrEmpty
 
-@Target(AnnotationTarget.TYPE)
+@Target(AnnotationTarget.TYPE, AnnotationTarget.VALUE_PARAMETER)
 @ByteDef(BLACK, WHITE)
 annotation class Stone
 
-fun Byte.isNotEmpty() = this != EMPTY
+fun @StoneOrEmpty Byte.isNotEmpty() = this != EMPTY
 
 internal val @Stone Byte.opposite: Byte
   get() = when (this) {
@@ -27,4 +26,3 @@ internal val @Stone Byte.opposite: Byte
     BLACK -> WHITE
     else -> EMPTY
   }
-

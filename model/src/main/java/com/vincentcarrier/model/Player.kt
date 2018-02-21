@@ -1,5 +1,7 @@
 package com.vincentcarrier.model
 
+import com.vincentcarrier.model.Board.Companion.BLACK
+
 
 data class Player(
     val type: PlayerType,
@@ -10,6 +12,8 @@ data class Player(
 
   var prisoners = 0
     internal set
+
+  override fun toString() = if (color == BLACK) "BLACK" else "WHITE"
 }
 
 enum class PlayerType {

@@ -12,35 +12,49 @@ import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 import android.view.ViewGroup
+import com.vincentcarrier.model.Legality.KO_RULE_BROKEN
+import com.vincentcarrier.model.Legality.LEGAL
+import com.vincentcarrier.model.Legality.OCCUPIED
+import com.vincentcarrier.model.Legality.OUTSIDE
+import com.vincentcarrier.model.Legality.SUICIDE
 import kotlinx.android.synthetic.main.fragment_board.boardView
+import org.jetbrains.anko.toast
 
 class BoardFragment : Fragment() {
 
-  private val vm by lazy { ViewModelProviders.of(this).get(BoardViewModel::class.java) }
+  private val vm by lazy {
+    ViewModelProviders.of(this).get(BoardViewModel::class.java)
+  }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View {
     return inflater.inflate(R.layout.fragment_board, container, false)
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     fun enterFullscreen() {
-          view?.systemUiVisibility =
-          SYSTEM_UI_FLAG_LAYOUT_STABLE or
-          SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-          SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-          SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-          SYSTEM_UI_FLAG_FULLSCREEN or
-          SYSTEM_UI_FLAG_IMMERSIVE
+      view?.systemUiVisibility =
+      SYSTEM_UI_FLAG_LAYOUT_STABLE or
+      SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+      SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+      SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+      SYSTEM_UI_FLAG_FULLSCREEN or
+      SYSTEM_UI_FLAG_IMMERSIVE
     }
 
     fun setUpBoardView() {
       with(boardView) {
         board = vm.game.board
-        setOnTouchListener { _, event ->
-          val c = pixelToCoordinate(event.x, event.y)
-          // && is lazily evaluated, so a bot can't submit a move through the UI
-          if (vm.game.isHumansTurn() && vm.game.submitMove(c).isLegal) invalidate()
-          true
+        onCellTouched = { coordinate ->
+          if (vm.game.isHumansTurn()) {
+            val legality = vm.game.submitMove(coordinate)
+            when (legality) {
+              OUTSIDE -> context.toast("Outside the board")
+              OCCUPIED -> context.toast("Occupied")
+              SUICIDE -> context.toast("Suicide")
+              KO_RULE_BROKEN -> context.toast("Circular")
+            }
+            legality == LEGAL
+          } else false
         }
       }
     }

@@ -1,13 +1,17 @@
 package com.vincentcarrier.model
 
-sealed class Turn
+import com.vincentcarrier.model.Board.Move
 
-data class Move(val c: Coordinate, val color: @Stone Byte) : Turn() {
-  constructor(x: Int, y: Int, color: @Stone Byte) : this(Coordinate(x,y), color)
+sealed class Turn {
+  class Play(val move: Move) : Turn()
+  object Pass : Turn()
+  object Resign : Turn()
 
-  override fun toString() = "$c - ${if (color == BLACK) "BLACK" else "WHITE"}"
+  override fun toString(): String {
+    return when (this) {
+      is Play -> "$move"
+      Pass -> "PASS"
+      Resign -> "RESIGN"
+    }
+  }
 }
-
-object Pass : Turn()
-
-object Resign : Turn()
