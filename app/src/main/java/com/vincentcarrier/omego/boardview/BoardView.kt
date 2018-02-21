@@ -18,17 +18,13 @@ import com.vincentcarrier.model.Board.Companion.BLACK
 import com.vincentcarrier.model.Board.Companion.WHITE
 import com.vincentcarrier.model.Board.Coordinate
 import com.vincentcarrier.model.Stone
-import org.jetbrains.anko.AnkoLogger
+import com.vincentcarrier.model.Validity
 import kotlin.math.roundToInt
-
-typealias Valid = Boolean
 
 class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
 
-  private val logger = AnkoLogger<BoardView>()
-
   internal lateinit var board: Board
-  internal lateinit var onCellTouched: (Coordinate) -> Valid
+  internal lateinit var onCellTouched: (Coordinate) -> Validity
 
   private var theme = BoardTheme()
   private lateinit var boardRect: Rect
@@ -40,10 +36,7 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
 
   private val tapDetector = object : SimpleOnGestureListener() {
     override fun onDown(e: MotionEvent) = true
-    override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-
-      return true
-    }
+    override fun onSingleTapUp(e: MotionEvent) = true
   }
 
   private val scaleDetector by lazy {
@@ -70,41 +63,43 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
   override fun onTouchEvent(event: MotionEvent): Boolean {
     return when (event.action) {
       ACTION_DOWN -> return true
-      ACTION_UP -> onCellTouched(coordinateFromPixel(event.x, event.y))
       ACTION_MOVE -> scaleDetector.onTouchEvent(event)
+      ACTION_UP -> {
+        if (tapDetector.onSingleTapUp(event)
+            && onCellTouched(coordinateFromPixel(event.x, event.y))) {
+          invalidate()
+          true
+        } else false
+      }
       else -> false
     }
   }
 
   override fun onDraw(canvas: Canvas) {
-    fun drawStone(x: Int, y: Int, @Stone color: Byte) {
-      canvas.drawCircle(
-          coordinateToPixelX(x),
-          coordinateToPixelY(y),
-          0.4f * gridSpace,
-          if (color == BLACK) theme.blackStonePaint else theme.whiteStonePaint
-      )
+    fun handleScaling(func: () -> Unit) {
+      with(canvas) {
+        super.onDraw(this)
+        save()
+        scale(scaleFactor, scaleFactor)
+        func()
+        restore()
+      }
     }
 
-    scaleX = scaleFactor
-    scaleY = scaleFactor
+    fun drawBackground() = theme.drawBackground(canvas)
 
-    with(canvas) {
-      theme.drawBackground(this)
+    fun drawBoard() = canvas.drawRect(boardRect, theme.boardPaint)
 
-      // Draw the board
-      drawRect(boardRect, theme.boardPaint)
-
-      // Draw the board
+    fun drawGrid() {
       if (theme.gridPaint != null) {
         (0 .. board.size).forEach { position ->
-          drawHorizontalLine( // draw
+          canvas.drawHorizontalLine( // draw
               gridRect.left,
               gridRect.top + gridSpace * position,
               gridRect.width(),
               theme.gridPaint!!
           )
-          drawVerticalLine(
+          canvas.drawVerticalLine(
               gridRect.left + gridSpace * position,
               gridRect.top,
               gridRect.width(),
@@ -112,8 +107,18 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
           )
         }
       }
+    }
 
-      // Draw the stones
+    fun drawStones() {
+      fun drawStone(x: Int, y: Int, @Stone color: Byte) {
+        canvas.drawCircle(
+            coordinateToPixelX(x),
+            coordinateToPixelY(y),
+            0.4f * gridSpace,
+            if (color == BLACK) theme.blackStonePaint else theme.whiteStonePaint
+        )
+      }
+
       board.forEach { x, y, stone ->
         when (stone) {
           BLACK -> drawStone(x, y, BLACK)
@@ -121,13 +126,20 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
         }
       }
     }
+
+    handleScaling {
+      drawBackground()
+      drawBoard()
+      drawGrid()
+      drawStones()
+    }
   }
 
   private fun coordinateToPixelX(x: Int) = (boardRect.left + gridPadding + x * gridSpace).toFloat()
 
   private fun coordinateToPixelY(y: Int) = (boardRect.top + gridPadding + y * gridSpace).toFloat()
 
-  internal fun coordinateFromPixel(x: Float, y: Float): Coordinate {
+  private fun coordinateFromPixel(x: Float, y: Float): Coordinate {
     return board.c(((x - boardRect.left - gridPadding)/gridSpace).roundToInt(),
                    ((y - boardRect.top - gridPadding)/gridSpace).roundToInt())
   }

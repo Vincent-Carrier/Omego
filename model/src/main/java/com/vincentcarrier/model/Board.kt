@@ -8,6 +8,8 @@ typealias Grid = Array<ByteArray>
 
 typealias Coordinates = List<Coordinate>
 
+typealias Validity = Boolean
+
 data class Board(
     val size: Int = 19,
     private val grid: Grid = Array(size) { ByteArray(size) { EMPTY } }
@@ -21,6 +23,8 @@ data class Board(
         when (char) {
           'W' -> placeStone(x, y, WHITE)
           'B' -> placeStone(x, y, BLACK)
+          'O' -> { }
+          else -> throw IllegalArgumentException("Did not expect character $char")
         }
       }
     }

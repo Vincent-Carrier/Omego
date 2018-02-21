@@ -60,7 +60,7 @@ class Game(
           return legality
         }
       }
-      Pass -> if (history.peek().turn == Pass) gameOver() // The game ends when both players are out of good moves
+      Pass -> if (history.peek().turn == Pass) gameOver()
       Resign -> {
         state = when (activePlayer.color) {
           BLACK -> WHITE_WIN

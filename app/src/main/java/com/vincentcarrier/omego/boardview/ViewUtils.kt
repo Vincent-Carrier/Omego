@@ -11,7 +11,11 @@ import android.view.View
 
 
 internal fun AppCompatActivity.addFragment(@IdRes container: Int, fragment: Fragment) {
-  supportFragmentManager.beginTransaction().add(container, fragment).commit()
+  supportFragmentManager.beginTransaction().add(
+      container,
+      fragment.apply { retainInstance = true },
+      "${fragment::class}"
+  ).commit()
 }
 
 internal fun View.square(l: Int, t: Int, w: Int) = Rect(l, t, l+w, t+w)
