@@ -21,12 +21,15 @@ import java.util.Stack
 typealias History = Stack<Moment>
 
 class Game(
-    val board: Board = Board(),
+    board: Board = Board(),
     blackPlayerType: PlayerType = HUMAN,
     whitePlayerType: PlayerType = HUMAN,
     private val komi: Float = 6.5f, // White's compensation for playing second
     private val handicap: Int = 0 // Number of stones black can place at the beginning
 ) {
+  var board = board
+    private set
+
   var state = ONGOING
     private set
 
@@ -50,10 +53,12 @@ class Game(
 
   fun undo() {
     undoHistory.push(history.pop())
+    board = history.peek().board
   }
 
   fun redo() {
     history.push(undoHistory.pop())
+    board = history.peek().board
   }
 
   private fun submitTurn(turn: Turn): Legality {

@@ -23,6 +23,8 @@ import com.vincentcarrier.model.Validity
 import com.vincentcarrier.omego.drawHorizontalLine
 import com.vincentcarrier.omego.drawVerticalLine
 import com.vincentcarrier.omego.square
+import java.lang.Math.max
+import java.lang.Math.min
 import kotlin.math.roundToInt
 
 class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
@@ -50,7 +52,7 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
         object : SimpleOnScaleGestureListener() {
           override fun onScale(detector: ScaleGestureDetector): Boolean {
             scaleFactor *= detector.scaleFactor
-            Math.max(0.5f, Math.min(scaleFactor, 5.0f))
+            max(0.5f, min(scaleFactor, 5.0f))
             invalidate()
             return true
           }
@@ -58,10 +60,11 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
     ) }
 
   override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-    boardRect = square(left, top, (0.9 * height).toInt())
+    boardRect = square(left, top, min(width, height))
     gridPadding = boardRect.width() / 10
     gridRect = square(left + gridPadding, top + gridPadding, boardRect.width() - gridPadding * 2)
     gridSpace = gridRect.width() / board.size
+    scaleFactor = max(width, height) / boardRect.height().toFloat()
   }
 
   @SuppressLint("ClickableViewAccessibility")
@@ -71,7 +74,7 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
           ((y - boardRect.top - gridPadding)/gridSpace).roundToInt())
     }
 
-    return when (event.action) {
+    return when (event.actionMasked) {
       ACTION_DOWN -> return true
       ACTION_MOVE -> scaleDetector.onTouchEvent(event)
       ACTION_UP -> {

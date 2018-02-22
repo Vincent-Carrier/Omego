@@ -31,6 +31,6 @@ class MainActivity : AppCompatActivity() {
   }
 
   class MainViewModel : ViewModel() {
-    internal lateinit var game: Game
+    internal /*lateinit*/ var game: Game = Game()
   }
 }

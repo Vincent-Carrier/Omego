@@ -33,18 +33,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="9"
+        android:textSize="24sp"
         />
     <RadioButton
         android:id="@+id/thirteenButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="13"
+        android:textSize="24sp"
         />
     <RadioButton
         android:id="@+id/nineteenButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="19"
+        android:textSize="24sp"
         />
   </RadioGroup>
   <TextView
@@ -64,8 +67,9 @@
       android:id="@+id/startGameButton"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginBottom="24dp"
+      android:layout_marginBottom="36dp"
       android:text="Start Game"
+      android:textSize="24sp"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintHorizontal_bias="0.5"
