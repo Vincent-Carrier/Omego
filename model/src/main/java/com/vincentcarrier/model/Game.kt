@@ -27,17 +27,16 @@ class Game(
     private val komi: Float = 6.5f, // White's compensation for playing second
     private val handicap: Int = 0 // Number of stones black can place at the beginning
 ) {
-
   var state = ONGOING
     private set
 
   val blackPlayer = Player(blackPlayerType, BLACK)
-
   val whitePlayer = Player(whitePlayerType, WHITE)
 
   val activePlayer get() = if (history.size % 2 == 0) blackPlayer else whitePlayer
 
   private val history = History()
+  private val undoHistory = History()
 
   fun isHumansTurn() = activePlayer.type == HUMAN
 
@@ -48,6 +47,14 @@ class Game(
   fun pass() = submitTurn(Pass)
 
   fun resign() = submitTurn(Resign)
+
+  fun undo() {
+    undoHistory.push(history.pop())
+  }
+
+  fun redo() {
+    history.push(undoHistory.pop())
+  }
 
   private fun submitTurn(turn: Turn): Legality {
     when (turn) {

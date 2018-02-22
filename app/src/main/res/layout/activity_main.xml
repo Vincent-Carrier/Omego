@@ -3,20 +3,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
-
-
   <fragment
-      android:id="@+id/board_fragment"
-      android:name="com.vincentcarrier.omego.BoardFragment"
+      android:tag="MAIN"
+      android:id="@+id/main_fragment"
+      android:name="com.vincentcarrier.omego.newgame.NewGameFragment"
       android:layout_width="0dp"
       android:layout_height="0dp"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      tools:layout="@layout/fragment_board"
+      tools:layout="@layout/fragment_new_game"
       />
 </android.support.constraint.ConstraintLayout>

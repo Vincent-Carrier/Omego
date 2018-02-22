@@ -43,10 +43,12 @@ data class Board(
     const val WHITE: Byte = 2
   }
 
-  fun forEach(func: (Int, Int, @StoneOrEmpty Byte) -> Unit) {
+  fun c(x: Int, y: Int) = Coordinate(x,y)
+
+  fun forEach(func: (c: Coordinate, @StoneOrEmpty Byte) -> Unit) {
     grid.forEachIndexed { y, row ->
       row.forEachIndexed { x, stone ->
-          func(x, y, stone)
+          func(c(x,y), stone)
       }
     }
   }
@@ -193,9 +195,8 @@ data class Board(
     }
   }
 
-  fun c(x: Int, y: Int) = Coordinate(x,y)
-
-  fun coordinates(vararg xy: Int): Coordinates {
+  // For testing
+  internal fun coordinates(vararg xy: Int): Coordinates {
     val xs = xy.filterIndexed { index, _ -> index % 2 == 0 }
     val ys = xy.filterIndexed { index, _ -> index % 2 == 1 }
     if (xs.size != ys.size) throw IllegalArgumentException("Must enter an even number of Ints")

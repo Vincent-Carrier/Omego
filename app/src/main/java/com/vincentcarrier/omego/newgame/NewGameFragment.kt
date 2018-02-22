@@ -1,0 +1,57 @@
+package com.vincentcarrier.omego.newgame
+
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProviders
+import android.os.Bundle
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import com.vincentcarrier.model.Board
+import com.vincentcarrier.model.Game
+import com.vincentcarrier.omego.MainActivity
+import com.vincentcarrier.omego.R
+import com.vincentcarrier.omego.board.BoardFragment
+import kotlinx.android.synthetic.main.fragment_new_game.boardSizeButtonGroup
+import kotlinx.android.synthetic.main.fragment_new_game.startGameButton
+
+
+class NewGameFragment : Fragment() {
+  val vm by lazy {
+    ViewModelProviders.of(this).get(NewGameViewModel::class.java)
+  }
+
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View? {
+    return inflater.inflate(R.layout.fragment_new_game, container, false)
+  }
+
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
+
+    boardSizeButtonGroup.setOnCheckedChangeListener { _, checkedId ->
+      vm.boardSize = when (checkedId) {
+        R.id.nineButton -> 9
+        R.id.thirteenButton -> 13
+        R.id.nineteenButton -> 19
+        else -> throw IllegalStateException("One of the three size buttons should be selected")
+      }
+    }
+
+    startGameButton.setOnClickListener {
+      mainVm.game = Game(Board(size = vm.boardSize))
+      transaction { replace(R.id.main_fragment, BoardFragment(), BoardFragment.TAG) }
+    }
+  }
+
+  class NewGameViewModel : ViewModel() {
+    var boardSize = 19
+  }
+}
+
+
+fun Fragment.transaction(body: FragmentTransaction.() -> FragmentTransaction) {
+  fragmentManager?.beginTransaction()?.body()?.commit()
+}
+
+val Fragment.mainVm get() = (activity as MainActivity).vm

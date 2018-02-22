@@ -26,6 +26,7 @@ buildscript {
             project(":model"),
             "org.jetbrains.anko:anko-commons:$anko_version",
             "com.android.support:appcompat-v7:$android_support_version",
+            "com.android.support:support-v4:$android_support_version",
             "com.android.support:support-annotations:$android_support_version",
             'com.android.support.constraint:constraint-layout:1.0.2',
             'androidx.core:core-ktx:0.1',
@@ -34,7 +35,8 @@ buildscript {
         ],
         uiTesting: [
             'com.android.support.test:runner:1.0.1',
-            'com.android.support.test.espresso:espresso-core:3.0.1'
+            'com.android.support.test.espresso:espresso-core:3.0.1',
+            'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
         ]
     ]
 

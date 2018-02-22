@@ -1,4 +1,4 @@
-package com.vincentcarrier.omego.boardview
+package com.vincentcarrier.omego
 
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -9,14 +9,6 @@ import android.support.v7.app.AppCompatActivity
 import android.util.TypedValue
 import android.view.View
 
-
-internal fun AppCompatActivity.addFragment(@IdRes container: Int, fragment: Fragment) {
-  supportFragmentManager.beginTransaction().add(
-      container,
-      fragment.apply { retainInstance = true },
-      "${fragment::class}"
-  ).commit()
-}
 
 internal fun View.square(l: Int, t: Int, w: Int) = Rect(l, t, l+w, t+w)
 

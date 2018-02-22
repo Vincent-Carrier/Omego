@@ -1,9 +1,10 @@
-package com.vincentcarrier.omego.boardview
+package com.vincentcarrier.omego.board
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
@@ -19,6 +20,9 @@ import com.vincentcarrier.model.Board.Companion.WHITE
 import com.vincentcarrier.model.Board.Coordinate
 import com.vincentcarrier.model.Stone
 import com.vincentcarrier.model.Validity
+import com.vincentcarrier.omego.drawHorizontalLine
+import com.vincentcarrier.omego.drawVerticalLine
+import com.vincentcarrier.omego.square
 import kotlin.math.roundToInt
 
 class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
@@ -33,6 +37,7 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
   private var gridPadding = 0
 
   private var scaleFactor = 1f
+  private var viewport = RectF()
 
   private val tapDetector = object : SimpleOnGestureListener() {
     override fun onDown(e: MotionEvent) = true
@@ -61,6 +66,11 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
 
   @SuppressLint("ClickableViewAccessibility")
   override fun onTouchEvent(event: MotionEvent): Boolean {
+    fun coordinateFromPixel(x: Float, y: Float): Coordinate {
+      return board.c(((x - boardRect.left - gridPadding)/gridSpace).roundToInt(),
+          ((y - boardRect.top - gridPadding)/gridSpace).roundToInt())
+    }
+
     return when (event.action) {
       ACTION_DOWN -> return true
       ACTION_MOVE -> scaleDetector.onTouchEvent(event)
@@ -76,12 +86,12 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
   }
 
   override fun onDraw(canvas: Canvas) {
-    fun handleScaling(func: () -> Unit) {
+    fun handleScaling(body: () -> Unit) {
       with(canvas) {
         super.onDraw(this)
         save()
         scale(scaleFactor, scaleFactor)
-        func()
+        body()
         restore()
       }
     }
@@ -110,19 +120,22 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
     }
 
     fun drawStones() {
-      fun drawStone(x: Int, y: Int, @Stone color: Byte) {
-        canvas.drawCircle(
-            coordinateToPixelX(x),
-            coordinateToPixelY(y),
-            0.4f * gridSpace,
-            if (color == BLACK) theme.blackStonePaint else theme.whiteStonePaint
-        )
-      }
+      fun drawStone(c: Coordinate, @Stone color: Byte) {
+        fun Coordinate.toPixelX() = (boardRect.left + gridPadding + x * gridSpace).toFloat()
+        fun Coordinate.toPixelY() = (boardRect.top + gridPadding + y * gridSpace).toFloat()
 
-      board.forEach { x, y, stone ->
+              canvas.drawCircle(
+                  c.toPixelX(),
+                  c.toPixelY(),
+                  0.4f * gridSpace,
+                  if (color == BLACK) theme.blackStonePaint else theme.whiteStonePaint
+              )
+        }
+
+      board.forEach { c, stone ->
         when (stone) {
-          BLACK -> drawStone(x, y, BLACK)
-          WHITE -> drawStone(x, y, WHITE)
+          BLACK -> drawStone(c, BLACK)
+          WHITE -> drawStone(c, WHITE)
         }
       }
     }
@@ -133,14 +146,5 @@ class BoardView(ctx: Context, attrs: AttributeSet) : View(ctx, attrs) {
       drawGrid()
       drawStones()
     }
-  }
-
-  private fun coordinateToPixelX(x: Int) = (boardRect.left + gridPadding + x * gridSpace).toFloat()
-
-  private fun coordinateToPixelY(y: Int) = (boardRect.top + gridPadding + y * gridSpace).toFloat()
-
-  private fun coordinateFromPixel(x: Float, y: Float): Coordinate {
-    return board.c(((x - boardRect.left - gridPadding)/gridSpace).roundToInt(),
-                   ((y - boardRect.top - gridPadding)/gridSpace).roundToInt())
   }
 }
