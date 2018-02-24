@@ -57,15 +57,14 @@ object BoardSpec : SubjectSpek<Board>({
     }
 
     it("should have isSuicide() return true if a move is suicide") {
-      Move(c(5,5), WHITE).isSuicide shouldBe true
+      Move(c(5,5), WHITE).isSuicide() shouldBe true
     }
 
     it("should have isSuicide() return false if a move is not suicide") {
-      Move(c(5,0), BLACK).isSuicide shouldBe false
+      Move(c(5,0), BLACK).isSuicide() shouldBe false
     }
 
     it("should remove stones when executeMove() captures them") {
-      print(coordinates(4,0, 5,1))
       Move(c(5,0), BLACK).execute() shouldBeIn coordinates(4,0, 5,1)
 //      isEmptyAt(c(5,0)) shouldBe false
 //      isEmptyAt(c(4,0)) shouldBe true

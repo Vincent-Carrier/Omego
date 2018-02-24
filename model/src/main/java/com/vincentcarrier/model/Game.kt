@@ -35,13 +35,11 @@ class Game(
 
   val blackPlayer = Player(blackPlayerType, BLACK)
   val whitePlayer = Player(whitePlayerType, WHITE)
-
   val activePlayer get() = if (history.size % 2 == 0) blackPlayer else whitePlayer
+  val isHumansTurn get() = activePlayer.type == HUMAN
 
   private val history = History()
   private val undoHistory = History()
-
-  fun isHumansTurn() = activePlayer.type == HUMAN
 
   fun submitMove(c: Coordinate) = submitTurn(Play(board.Move(c, activePlayer.color)))
 
@@ -62,6 +60,28 @@ class Game(
   }
 
   private fun submitTurn(turn: Turn): Legality {
+    fun legality(move: Move): Legality {
+      fun koRuleIsRespected(move: Move): Boolean {
+        // A player is note allowed to play a move that would continue an infinite back and forth
+        return move.simulate {
+          history.search(Moment(Play(move), it)) == -1 // TODO: Optimize this
+        }
+      }
+
+      return when {
+        !move.c.isWithinBoard -> OUTSIDE
+        !board.isEmptyAt(move.c) -> OCCUPIED
+        move.isSuicide() -> SUICIDE
+        !koRuleIsRespected(move) -> KO_RULE_BROKEN
+        else -> LEGAL
+      }
+    }
+    fun gameOver() {
+      blackPlayer.score = board.territory(BLACK).size.toFloat()
+      whitePlayer.score = board.territory(WHITE).size.toFloat() + komi
+      state = if (blackPlayer.score > whitePlayer.score) BLACK_WIN else WHITE_WIN
+    }
+
     when (turn) {
       is Play -> {
         val legality = legality(turn.move)
@@ -85,29 +105,6 @@ class Game(
     println("$turn was played")
     println(board)
     return LEGAL
-  }
-
-  private fun legality(move: Move): Legality {
-    fun koRuleIsRespected(move: Move): Boolean {
-      // A player is note allowed to play a move that would continue an infinite back and forth
-      return board.simulateMove(move) {
-        history.search(Moment(Play(move), it)) == -1 // TODO: Optimize this
-      }
-    }
-
-    return when {
-      !move.c.isWithinBoard -> OUTSIDE
-      !board.isEmptyAt(move.c) -> OCCUPIED
-      move.isSuicide -> SUICIDE
-      !koRuleIsRespected(move) -> KO_RULE_BROKEN
-      else -> LEGAL
-    }
-  }
-
-  private fun gameOver() {
-    blackPlayer.score = board.territory(BLACK).size.toFloat()
-    whitePlayer.score = board.territory(WHITE).size.toFloat() + komi
-    state = if (blackPlayer.score > whitePlayer.score) BLACK_WIN else WHITE_WIN
   }
 }
 

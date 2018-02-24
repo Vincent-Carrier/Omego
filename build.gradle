@@ -23,7 +23,6 @@ buildscript {
             "com.nhaarman:mockito-kotlin-kt1.1:1.5.0"
         ],
         ui: [
-            project(":model"),
             "org.jetbrains.anko:anko-commons:$anko_version",
             "com.android.support:appcompat-v7:$android_support_version",
             "com.android.support:support-v4:$android_support_version",

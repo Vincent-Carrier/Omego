@@ -1,22 +1,22 @@
 package com.vincentcarrier.model
 
 import com.vincentcarrier.model.Board.Coordinate
-import java.util.Arrays
+import kotlin.math.sqrt
 
 
 typealias Grid = Array<ByteArray>
 
 typealias Coordinates = List<Coordinate>
 
-typealias Validity = Boolean
+data class Board (val size: Int = 19) {
 
-data class Board(
-    val size: Int = 19,
-    private val grid: Grid = Array(size) { ByteArray(size) { EMPTY } }
-) {
+  companion object {
+    const val EMPTY: Byte = 0
+    const val BLACK: Byte = 1
+    const val WHITE: Byte = 2
+  }
 
-  constructor(string: String) :
-      this(Math.sqrt(string.trim().length.toDouble()).toInt()) {
+  internal constructor(string: String) : this(sqrt(string.length.toFloat()).toInt()) {
     val charGrid = string.split('\n')
     charGrid.forEachIndexed { y, s ->
       s.forEachIndexed { x, char ->
@@ -30,17 +30,13 @@ data class Board(
     }
   }
 
+  private val grid: Grid = Array(size) { ByteArray(size) { EMPTY } }
+
   init {
     if (grid.size != size) throw IllegalArgumentException("Constructed board must be same size as given size")
     grid.forEach { row ->
       if (row.size != grid.size) throw IllegalStateException("Board must be a square")
     }
-  }
-
-  companion object {
-    const val EMPTY: Byte = 0
-    const val BLACK: Byte = 1
-    const val WHITE: Byte = 2
   }
 
   fun c(x: Int, y: Int) = Coordinate(x,y)
@@ -54,7 +50,11 @@ data class Board(
   }
 
   fun group(c: Coordinate): Coordinates {
-    fun sameColorAdjacent(c: Coordinate): Coordinates = adjacentCoordinates(c).filter { c isSameColorAs it }
+    fun sameColorAdjacent(c: Coordinate): Coordinates {
+      infix fun Coordinate.isSameColorAs(c: Coordinate) = get(this) == get(c)
+
+      return adjacentCoordinates(c).filter { c isSameColorAs it }
+    }
 
     if (isEmptyAt(c)) throw IllegalArgumentException("This coordinate is empty")
     val group = mutableListOf(c)
@@ -78,11 +78,6 @@ data class Board(
 
   fun atari(group: Coordinates) = liberties(group).size == 1
 
-  internal fun simulateMove(move: Move, checkCondition: (Board) -> Boolean): Boolean {
-    val virtualBoard = copy().apply { move.execute() }
-    return checkCondition(virtualBoard)
-  }
-
   internal fun territory(player: @Stone Byte): Coordinates {
     TODO()
   }
@@ -105,24 +100,94 @@ data class Board(
                   Coordinate(c.x, c.y - 1), Coordinate(c.x - 1, c.y)).filter { it.isWithinBoard }
   }
 
-  private infix fun Coordinate.isSameColorAs(c: Coordinate) = get(this) == get(c)
+  private fun Coordinates.isSurrounded() = liberties(this).isEmpty()
 
-  private infix fun Coordinate.isOppositeColorOf(c: Coordinate) = get(this) == get(c).opposite
+  inner class Coordinate internal constructor(val x: Int, val y: Int) {
 
-  private fun oppositeColorAdjacent(c: Coordinate): Coordinates {
-    return adjacentCoordinates(c).filter { c isOppositeColorOf it }
-  }
+    constructor(string: String) : this(
+        string[0].toUpperCase() - 'A',
+        size - Integer.parseInt(string.substring(1))
+    )
 
-  private fun surroundingCoordinates(group: Coordinates): Coordinates {
-    val oppositeColor = get(group[0]).opposite
-    return group.flatMap {
-      adjacentCoordinates(it)
-          .filter { get(it) == oppositeColor }
-          .distinct()
+    val isWithinBoard: Boolean
+      get() = this.x >= 0 && this.y >= 0 && this.x < size && this.y < size
+
+    override fun toString(): String = "${'A' + x}${size - y}"
+
+    override fun equals(other: Any?): Boolean {
+      return other is Coordinate && other.x == this.x && other.y == this.y
+    }
+
+    override fun hashCode(): Int {
+      var result = x
+      result = 31 * result + y
+      return result
     }
   }
 
-  private fun Coordinates.isSurrounded() = liberties(this).isEmpty()
+  inner class Move(val c: Coordinate, val color: @Stone Byte) {
+    fun execute(): Coordinates {
+      fun removeStones(coordinates: Coordinates) {
+        coordinates.forEach {
+          grid[it.y][it.x] = EMPTY
+        }
+      }
+      fun oppositeColorAdjacent(c: Coordinate): Coordinates {
+        infix fun Coordinate.isOppositeColorOf(c: Coordinate) = get(this) == get(c).opposite
+
+        return adjacentCoordinates(c).filter { c isOppositeColorOf it }
+      }
+
+      placeStone(this)
+      // Remove any captured stones
+      val removedStones = mutableListOf<Coordinate>()
+      oppositeColorAdjacent(this.c).forEach {
+        val group = group(it)
+        if (group.isSurrounded()) {
+          removeStones(group)
+          removedStones.addAll(group)
+        }
+      }
+
+      return removedStones
+    }
+
+    internal fun simulate(checkCondition: (Board) -> Boolean): Boolean {
+      val virtualBoard = copy().apply { this@Move.execute() }
+      return checkCondition(virtualBoard)
+    }
+
+    internal fun isSuicide(): Boolean {
+      fun surroundingCoordinates(group: Coordinates): Coordinates {
+        val oppositeColor = get(group[0]).opposite
+        return group.flatMap {
+          adjacentCoordinates(it)
+              .filter { get(it) == oppositeColor }
+              .distinct()
+        }
+      }
+
+      return simulate {
+        val group = group(this.c)
+
+        if (!group.isSurrounded()) false
+        // If the group surrounding the inner group is itself surrounded, then the move is not suicide
+        else !(surroundingCoordinates(group).isSurrounded())
+      }
+    }
+
+    override fun toString() = "$c - ${if (color == BLACK) "BLACK" else "WHITE"}"
+  }
+
+  // For testing
+  internal fun coordinates(vararg xy: Int): Coordinates {
+    val xs = xy.filterIndexed { index, _ -> index % 2 == 0 }
+    val ys = xy.filterIndexed { index, _ -> index % 2 == 1 }
+    if (xs.size != ys.size) throw IllegalArgumentException("Must enter an even number of Ints")
+    return xs.zip(ys) { x, y ->
+      c(x,y)
+    }
+  }
 
   override fun toString(): String {
     operator fun Char.times(n: Int): String {
@@ -155,94 +220,5 @@ data class Board(
         appendln()
       }
     }.toString()
-  }
-
-  override fun equals(other: Any?): Boolean {
-    if (this === other) return true
-    if (javaClass != other?.javaClass) return false
-
-    other as Board
-
-    if (size != other.size || !grid.contentEquals(other.grid)) return false
-
-    return true
-  }
-
-  override fun hashCode(): Int {
-    return Arrays.hashCode(grid)
-  }
-
-  inner class Coordinate internal constructor(val x: Int, val y: Int) {
-
-    constructor(string: String) : this(
-        string[0].toUpperCase() - 'A',
-        size - Integer.parseInt(string.substring(1))
-    )
-
-    val isWithinBoard: Boolean
-      get() = this.x >= 0 && this.y >= 0 && this.x < size && this.y < size
-
-    override fun toString(): String = "${'A' + x}${size - y}"
-
-    override fun equals(other: Any?): Boolean {
-      return other is Coordinate && other.x == this.x && other.y == this.y
-    }
-
-    override fun hashCode(): Int {
-      var result = x
-      result = 31 * result + y
-      return result
-    }
-  }
-
-  // For testing
-  internal fun coordinates(vararg xy: Int): Coordinates {
-    val xs = xy.filterIndexed { index, _ -> index % 2 == 0 }
-    val ys = xy.filterIndexed { index, _ -> index % 2 == 1 }
-    if (xs.size != ys.size) throw IllegalArgumentException("Must enter an even number of Ints")
-    return xs.zip(ys) { x, y ->
-      c(x,y)
-    }
-  }
-
-  inner class Move(val c: Coordinate, val color: @Stone Byte) {
-    fun execute(): Coordinates {
-      fun removeStones(coordinates: Coordinates) {
-        coordinates.forEach {
-          grid[it.y][it.x] = EMPTY
-        }
-      }
-
-      placeStone(this)
-      // Remove any captured stones
-      val removedStones = mutableListOf<Coordinate>()
-      oppositeColorAdjacent(this.c).forEach {
-        val group = group(it)
-        if (group.isSurrounded()) {
-          removeStones(group)
-          removedStones.addAll(group)
-        }
-      }
-
-      return removedStones
-    }
-
-    internal val isSuicide: Boolean
-      get() {
-        fun simulateMove(move: Move, checkCondition: (Board) -> Boolean): Boolean {
-          val virtualBoard = copy().apply { move.execute() }
-          return checkCondition(virtualBoard)
-        }
-
-        return simulateMove(this) {
-          val group = group(this.c)
-
-          if (!group.isSurrounded()) false
-          // If the group surrounding the inner group is itself surrounded, then the move is not suicide
-          else !(surroundingCoordinates(group).isSurrounded())
-        }
-      }
-
-    override fun toString() = "$c - ${if (color == BLACK) "BLACK" else "WHITE"}"
   }
 }

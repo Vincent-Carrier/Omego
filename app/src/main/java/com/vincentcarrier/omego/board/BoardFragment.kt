@@ -10,10 +10,10 @@ import com.vincentcarrier.model.Legality.LEGAL
 import com.vincentcarrier.model.Legality.OCCUPIED
 import com.vincentcarrier.model.Legality.OUTSIDE
 import com.vincentcarrier.model.Legality.SUICIDE
-import com.vincentcarrier.omego.MainActivity
-import com.vincentcarrier.omego.R.layout
+import com.vincentcarrier.omego.R
+import com.vincentcarrier.omego.mainVm
+import com.vincentcarrier.omego.toast
 import kotlinx.android.synthetic.main.fragment_board.boardView
-import org.jetbrains.anko.toast
 
 class BoardFragment : Fragment() {
   companion object {
@@ -21,26 +21,23 @@ class BoardFragment : Fragment() {
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View {
-    return inflater.inflate(layout.fragment_board, container, false)
+    return inflater.inflate(R.layout.fragment_board, container, false)
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     fun setUpBoardView() {
-      with(boardView) {
-        val vm = (activity as MainActivity).vm
-        board = vm.game.board
-        onCellTouched = { coordinate ->
-          if (vm.game.isHumansTurn()) {
-            val legality = vm.game.submitMove(coordinate)
-            when (legality) {
-              OUTSIDE -> context.toast("Outside the board")
-              OCCUPIED -> context.toast("Occupied")
-              SUICIDE -> context.toast("Suicide")
-              KO_RULE_BROKEN -> context.toast("Circular")
-            }
-            legality == LEGAL
-          } else false
-        }
+      boardView.board = mainVm.game.board
+      boardView.onBoardTouched = { coordinate ->
+        if (mainVm.game.isHumansTurn) {
+          val legality = mainVm.game.submitMove(coordinate)
+          when (legality) {
+            OUTSIDE -> toast("Outside the board")
+            OCCUPIED -> toast("Occupied")
+            SUICIDE -> toast("Suicide")
+            KO_RULE_BROKEN -> toast("Circular")
+          }
+          legality == LEGAL
+        } else false
       }
     }
 
