@@ -27,6 +27,6 @@ class MainActivity : AppCompatActivity() {
   }
 
   class MainViewModel : ViewModel() {
-    internal var game = Game()
+    internal lateinit var game: Game
   }
 }

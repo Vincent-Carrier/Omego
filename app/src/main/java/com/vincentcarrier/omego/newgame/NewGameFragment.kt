@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.vincentcarrier.model.Board
 import com.vincentcarrier.model.Game
 import com.vincentcarrier.omego.R
 import com.vincentcarrier.omego.board.BoardFragment
@@ -43,7 +42,7 @@ class NewGameFragment : Fragment() {
     }
 
     startGameButton.setOnClickListener {
-      mainVm.game = Game(Board(size = vm.boardSize))
+      mainVm.game = Game(vm.boardSize)
       transaction { add(R.id.main_fragment, BoardFragment(), BoardFragment.TAG) }
     }
   }

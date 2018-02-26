@@ -28,11 +28,13 @@ import kotlin.math.roundToInt
 internal class BoardView : View {
   constructor(ctx: Context) : super(ctx)
   constructor(ctx: Context, attributeSet: AttributeSet) : super(ctx, attributeSet)
+  constructor(ctx: Context, attributeSet: AttributeSet, defStyleAttr: Int) : super(ctx, attributeSet, defStyleAttr)
+  constructor(ctx: Context, attributeSet: AttributeSet, defStyleAttr: Int, defStyleRes: Int)
+      : super(ctx, attributeSet, defStyleAttr, defStyleRes)
 
   companion object {
     private const val MIN_ZOOM = 1f
     private const val MAX_ZOOM = 2f
-    private const val ZOOMED_IN = MIN_ZOOM + (MAX_ZOOM - MIN_ZOOM) * 0.2
   }
 
   internal lateinit var board: Board
@@ -63,8 +65,10 @@ internal class BoardView : View {
       return true
     }
 
-    override fun onDoubleTap(e: MotionEvent?): Boolean {
-      if (scaleX >= ZOOMED_IN) setZoomLevel(MIN_ZOOM) else setZoomLevel(MAX_ZOOM)
+    override fun onDoubleTap(e: MotionEvent): Boolean {
+      setZoomLevel(if (scaleX == MAX_ZOOM) MIN_ZOOM else MAX_ZOOM)
+      pivotX = e.x
+      pivotY = e.y
       return true
     }
 
@@ -95,7 +99,10 @@ internal class BoardView : View {
 
   @SuppressLint("ClickableViewAccessibility")
   override fun onTouchEvent(e: MotionEvent): Boolean {
-    return gestureDetector.onTouchEvent(e) || scaleDetector.onTouchEvent(e)
+    val gestureDetected = gestureDetector.onTouchEvent(e)
+    val scaleDetected = scaleDetector.onTouchEvent(e)
+
+    return scaleDetected || gestureDetected
   }
 
   override fun onDraw(canvas: Canvas) {
@@ -120,12 +127,13 @@ internal class BoardView : View {
           }
         }
       }
+
       fun drawStones() {
         fun drawStone(c: Coordinate, paint: Paint) {
-          fun Coordinate.toPointFX() = boardRect.left + gridPadding + x * gridSpacing
-          fun Coordinate.toPointFY() = boardRect.top + gridPadding + y * gridSpacing
+          fun Coordinate.toPixelX() = boardRect.left + gridPadding + x * gridSpacing
+          fun Coordinate.toPixelY() = boardRect.top + gridPadding + y * gridSpacing
 
-          drawCircle(c.toPointFX(), c.toPointFY(), 0.4f * gridSpacing, paint)
+          drawCircle(c.toPixelX(), c.toPixelY(), 0.4f * gridSpacing, paint)
         }
 
         board.forEach { c, stone ->

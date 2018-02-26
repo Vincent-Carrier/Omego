@@ -20,13 +20,21 @@ import java.util.Stack
 
 typealias History = Stack<Moment>
 
-class Game(
+class Game internal constructor(
     board: Board = Board(),
     blackPlayerType: PlayerType = HUMAN,
     whitePlayerType: PlayerType = HUMAN,
     private val komi: Float = 6.5f, // White's compensation for playing second
     private val handicap: Int = 0 // Number of stones black can place at the beginning
 ) {
+  constructor(
+      size: Int = 19,
+      blackPlayerType: PlayerType = HUMAN,
+      whitePlayerType: PlayerType = HUMAN,
+      komi: Float = 6.5f,
+      handicap: Int = 0
+  ) : this(Board(size), blackPlayerType, whitePlayerType, komi, handicap)
+
   var board = board
     private set
 
@@ -35,8 +43,9 @@ class Game(
 
   val blackPlayer = Player(blackPlayerType, BLACK)
   val whitePlayer = Player(whitePlayerType, WHITE)
+
   val activePlayer get() = if (history.size % 2 == 0) blackPlayer else whitePlayer
-  val isHumansTurn get() = activePlayer.type == HUMAN
+  val activePlayerIsHuman get() = activePlayer.type == HUMAN
 
   private val history = History()
   private val undoHistory = History()

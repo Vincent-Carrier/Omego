@@ -26,18 +26,21 @@ class BoardFragment : Fragment() {
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     fun setUpBoardView() {
-      boardView.board = mainVm.game.board
-      boardView.onBoardTouched = { coordinate ->
-        if (mainVm.game.isHumansTurn) {
-          val legality = mainVm.game.submitMove(coordinate)
-          when (legality) {
-            OUTSIDE -> toast("Outside the board")
-            OCCUPIED -> toast("Occupied")
-            SUICIDE -> toast("Suicide")
-            KO_RULE_BROKEN -> toast("Circular")
-          }
-          legality == LEGAL
-        } else false
+      with(boardView) {
+        board = mainVm.game.board
+        onBoardTouched = { coordinate ->
+          if (mainVm.game.activePlayerIsHuman) {
+            val legality = mainVm.game.submitMove(coordinate)
+            when (legality) {
+              OUTSIDE -> toast("Outside the board")
+              OCCUPIED -> toast("Occupied")
+              SUICIDE -> toast("Suicide")
+              KO_RULE_BROKEN -> toast("Circular move")
+            }
+            legality == LEGAL
+          } else false
+      }
+
       }
     }
 
