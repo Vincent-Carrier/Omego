@@ -16,6 +16,7 @@ data class Board (val size: Int = 19) {
     const val WHITE: Byte = 2
   }
 
+  // For testing
   internal constructor(string: String) : this(sqrt(string.length.toFloat()).toInt()) {
     val charGrid = string.split('\n')
     charGrid.forEachIndexed { y, s ->
@@ -51,7 +52,7 @@ data class Board (val size: Int = 19) {
 
   fun group(c: Coordinate): Coordinates {
     fun sameColorAdjacent(c: Coordinate): Coordinates {
-      infix fun Coordinate.isSameColorAs(c: Coordinate) = get(this) == get(c)
+      infix fun Coordinate.isSameColorAs(c: Coordinate) = grid[this] == grid[c]
 
       return adjacentCoordinates(c).filter { c isSameColorAs it }
     }
@@ -82,9 +83,9 @@ data class Board (val size: Int = 19) {
     TODO()
   }
 
-  internal fun isEmptyAt(c: Coordinate) = get(c) == EMPTY
+  internal fun isEmptyAt(c: Coordinate) = grid[c] == EMPTY
 
-  private fun get(c: Coordinate): @StoneOrEmpty Byte = grid[c.y][c.x]
+  private operator fun Grid.get(c: Coordinate): @StoneOrEmpty Byte = this[c.y][c.x]
 
   private fun placeStone(c: Coordinate, color: @Stone Byte) {
     grid[c.y][c.x] = color
@@ -103,14 +104,12 @@ data class Board (val size: Int = 19) {
   private fun Coordinates.isSurrounded() = liberties(this).isEmpty()
 
   inner class Coordinate internal constructor(val x: Int, val y: Int) {
-
     constructor(string: String) : this(
         string[0].toUpperCase() - 'A',
         size - Integer.parseInt(string.substring(1))
     )
 
-    val isWithinBoard: Boolean
-      get() = this.x >= 0 && this.y >= 0 && this.x < size && this.y < size
+    val isWithinBoard get() = x >= 0 && y >= 0 && x < size && y < size
 
     override fun toString(): String = "${'A' + x}${size - y}"
 
@@ -127,13 +126,14 @@ data class Board (val size: Int = 19) {
 
   inner class Move(val c: Coordinate, val color: @Stone Byte) {
     fun execute(): Coordinates {
+      // TODO: Fix bug where a stone may reappear after the move was refused
       fun removeStones(coordinates: Coordinates) {
         coordinates.forEach {
           grid[it.y][it.x] = EMPTY
         }
       }
       fun oppositeColorAdjacent(c: Coordinate): Coordinates {
-        infix fun Coordinate.isOppositeColorOf(c: Coordinate) = get(this) == get(c).opposite
+        infix fun Coordinate.isOppositeColorOf(c: Coordinate) = grid[this] == grid[c].opposite
 
         return adjacentCoordinates(c).filter { c isOppositeColorOf it }
       }
@@ -159,10 +159,10 @@ data class Board (val size: Int = 19) {
 
     internal fun isSuicide(): Boolean {
       fun surroundingCoordinates(group: Coordinates): Coordinates {
-        val oppositeColor = get(group[0]).opposite
+        val oppositeColor = grid[group[0]].opposite
         return group.flatMap {
           adjacentCoordinates(it)
-              .filter { get(it) == oppositeColor }
+              .filter { grid[it] == oppositeColor }
               .distinct()
         }
       }

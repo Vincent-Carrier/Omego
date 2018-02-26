@@ -8,6 +8,7 @@ import android.view.Window.FEATURE_NO_TITLE
 import android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
 import com.vincentcarrier.model.Game
 
+
 class MainActivity : AppCompatActivity() {
 
   internal val vm by lazy {
@@ -26,6 +27,6 @@ class MainActivity : AppCompatActivity() {
   }
 
   class MainViewModel : ViewModel() {
-    internal val game = Game()
+    internal var game = Game()
   }
 }

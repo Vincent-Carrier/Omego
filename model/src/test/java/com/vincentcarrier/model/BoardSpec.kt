@@ -25,7 +25,7 @@ object BoardSpec : SubjectSpek<Board>({
 
   with(subject) {
     it("should have Coordinate.toString() return the proper output") {
-      "${c(0,0)}" shouldBeEqualTo "A6"
+      c(0,0).toString() shouldBeEqualTo "A6"
     }
 
     it("should have Coordinate() take a string and return the appropriate coordinate") {

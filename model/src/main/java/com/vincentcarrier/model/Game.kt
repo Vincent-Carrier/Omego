@@ -103,7 +103,6 @@ class Game(
     }
     history.push(Moment(turn, board))
     println("$turn was played")
-    println(board)
     return LEGAL
   }
 }

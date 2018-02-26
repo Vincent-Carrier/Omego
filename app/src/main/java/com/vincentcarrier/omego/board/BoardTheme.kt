@@ -8,9 +8,9 @@ import android.graphics.Color.WHITE
 import android.graphics.Paint
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 
-private val ALMOST_BLACK = Color.rgb(10, 10, 10)
+private val ALMOST_BLACK = Color.rgb(30, 30, 30)
 
-private val ALMOST_WHITE = Color.rgb(230, 230, 230)
+private val ALMOST_WHITE = Color.rgb(240, 240, 220)
 
 internal data class BoardTheme(
     val drawBackground: Canvas.() -> Unit = fun Canvas.() {
@@ -26,6 +26,6 @@ internal data class BoardTheme(
 internal val DARK_THEME = BoardTheme()
 
 internal val LIGHT_THEME = BoardTheme(
-    drawBackground = fun Canvas.() = drawColor(ALMOST_WHITE),
+    drawBackground = fun Canvas.() = drawColor(WHITE),
     boardPaint = Paint().apply { color = ALMOST_WHITE }
 )

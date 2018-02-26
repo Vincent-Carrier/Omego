@@ -10,7 +10,7 @@ import kotlin.annotation.AnnotationTarget.ANNOTATION_CLASS
 @Target(ANNOTATION_CLASS)
 annotation class ByteDef(vararg val value: Byte = [])
 
-@Target(AnnotationTarget.TYPE)
+@Target(AnnotationTarget.TYPE, AnnotationTarget.VALUE_PARAMETER)
 @ByteDef(EMPTY, BLACK, WHITE)
 annotation class StoneOrEmpty
 
