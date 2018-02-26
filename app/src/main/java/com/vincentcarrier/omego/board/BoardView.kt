@@ -28,6 +28,9 @@ import kotlin.math.roundToInt
 internal class BoardView : View {
   constructor(ctx: Context) : super(ctx)
   constructor(ctx: Context, attributeSet: AttributeSet) : super(ctx, attributeSet)
+  constructor(ctx: Context, attributeSet: AttributeSet, defStyleAttr: Int) : super(ctx, attributeSet, defStyleAttr)
+  constructor(ctx: Context, attributeSet: AttributeSet, defStyleAttr: Int, defStyleRes: Int)
+      : super(ctx, attributeSet, defStyleAttr, defStyleRes)
 
   companion object {
     private const val MIN_ZOOM = 1f
@@ -93,9 +96,16 @@ internal class BoardView : View {
     gridSpacing = gridRect.width() / board.size
   }
 
+  private var lastX: Float = 0f
+
+  private var lastY: Float = 0f
+
   @SuppressLint("ClickableViewAccessibility")
   override fun onTouchEvent(e: MotionEvent): Boolean {
-    return gestureDetector.onTouchEvent(e) || scaleDetector.onTouchEvent(e)
+    val gestureDetected = gestureDetector.onTouchEvent(e)
+    val scaleDetected = scaleDetector.onTouchEvent(e)
+
+    return scaleDetected || gestureDetected
   }
 
   override fun onDraw(canvas: Canvas) {
