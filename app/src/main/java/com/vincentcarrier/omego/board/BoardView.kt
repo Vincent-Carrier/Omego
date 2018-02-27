@@ -97,6 +97,10 @@ internal class BoardView : View {
     gridSpacing = gridRect.width() / board.size
   }
 
+  private var lastX: Float = 0f
+
+  private var lastY: Float = 0f
+
   @SuppressLint("ClickableViewAccessibility")
   override fun onTouchEvent(e: MotionEvent): Boolean {
     val gestureDetected = gestureDetector.onTouchEvent(e)
