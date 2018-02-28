@@ -20,11 +20,15 @@ class BoardFragment : Fragment() {
     const val TAG = "BOARD"
   }
 
+  init {
+    retainInstance = true
+  }
+
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View {
     return inflater.inflate(R.layout.fragment_board, container, false)
   }
 
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     fun setUpBoardView() {
       with(boardView) {
         board = mainVm.game.board
@@ -44,7 +48,7 @@ class BoardFragment : Fragment() {
       }
     }
 
-    super.onActivityCreated(savedInstanceState)
+    super.onViewCreated(view, savedInstanceState)
     setUpBoardView()
   }
 }

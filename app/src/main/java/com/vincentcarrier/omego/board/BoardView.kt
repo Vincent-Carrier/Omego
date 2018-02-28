@@ -21,16 +21,17 @@ import com.vincentcarrier.omego.drawHorizontalLine
 import com.vincentcarrier.omego.drawVerticalLine
 import com.vincentcarrier.omego.get
 import com.vincentcarrier.omego.square
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
 
 internal class BoardView : View {
   constructor(ctx: Context) : super(ctx)
-  constructor(ctx: Context, attributeSet: AttributeSet) : super(ctx, attributeSet)
-  constructor(ctx: Context, attributeSet: AttributeSet, defStyleAttr: Int) : super(ctx, attributeSet, defStyleAttr)
-  constructor(ctx: Context, attributeSet: AttributeSet, defStyleAttr: Int, defStyleRes: Int)
-      : super(ctx, attributeSet, defStyleAttr, defStyleRes)
+  constructor(ctx: Context, attr: AttributeSet) : super(ctx, attr)
+  constructor(ctx: Context, attr: AttributeSet, defStyleAttr: Int) : super(ctx, attr, defStyleAttr)
+  constructor(ctx: Context, attr: AttributeSet, defStyleAttr: Int, defStyleRes: Int)
+      : super(ctx, attr, defStyleAttr, defStyleRes)
 
   companion object {
     private const val MIN_ZOOM = 1f
@@ -50,6 +51,7 @@ internal class BoardView : View {
   private var gridRect = RectF()
   private var gridPadding = 0f
   private var gridSpacing = 0f
+  private var stoneRadius = 0f
 
   private val gestureDetector = GestureDetector(context, object : SimpleOnGestureListener() {
     override fun onDown(e: MotionEvent) = true
@@ -92,14 +94,15 @@ internal class BoardView : View {
 
   override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
     boardRect = square(left, top, min(width, height))
-    gridPadding = boardRect.width() * 0.03f
-    gridRect = square(left + gridPadding, top + gridPadding, boardRect.width() - gridPadding * 2)
-    gridSpacing = gridRect.width() / board.size
+    gridPadding = 0.03f * boardRect.width()
+    with(gridRect) {
+      set(boardRect)
+      inset(gridPadding, gridPadding)
+    }
+    gridSpacing = gridRect.width() / (board.size - 1)
+    stoneRadius = 0.4f * gridSpacing
+    setZoomLevel(max(width, height) / min(width, height).toFloat())
   }
-
-  private var lastX: Float = 0f
-
-  private var lastY: Float = 0f
 
   @SuppressLint("ClickableViewAccessibility")
   override fun onTouchEvent(e: MotionEvent): Boolean {
@@ -115,8 +118,8 @@ internal class BoardView : View {
       fun drawBoard() = drawRect(boardRect, theme.boardPaint)
       fun drawGrid() {
         if (theme.gridPaint != null) {
-          (0..board.size).forEach { position ->
-            drawHorizontalLine( // draw
+          (0 until board.size).forEach { position ->
+            drawHorizontalLine(
                 gridRect.left,
                 gridRect.top + gridSpacing * position,
                 gridRect.width(),
@@ -137,7 +140,7 @@ internal class BoardView : View {
           fun Coordinate.toPixelX() = boardRect.left + gridPadding + x * gridSpacing
           fun Coordinate.toPixelY() = boardRect.top + gridPadding + y * gridSpacing
 
-          drawCircle(c.toPixelX(), c.toPixelY(), 0.4f * gridSpacing, paint)
+          drawCircle(c.toPixelX(), c.toPixelY(), stoneRadius, paint)
         }
 
         board.forEach { c, stone ->

@@ -26,7 +26,9 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
   }
 
-  class MainViewModel : ViewModel() {
-    internal lateinit var game: Game
-  }
+
+}
+
+class MainViewModel : ViewModel() {
+  internal lateinit var game: Game
 }

@@ -21,6 +21,10 @@ class NewGameFragment : Fragment() {
     const val TAG = "NEW_GAME"
   }
 
+  init {
+    retainInstance = true
+  }
+
   val vm by lazy {
     ViewModelProviders.of(this).get(NewGameViewModel::class.java)
   }
@@ -29,8 +33,8 @@ class NewGameFragment : Fragment() {
     return inflater.inflate(R.layout.fragment_new_game, container, false)
   }
 
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
-    super.onActivityCreated(savedInstanceState)
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
 
     boardSizeButtonGroup.setOnCheckedChangeListener { _, checkedId ->
       vm.boardSize = when (checkedId) {
@@ -43,11 +47,13 @@ class NewGameFragment : Fragment() {
 
     startGameButton.setOnClickListener {
       mainVm.game = Game(vm.boardSize)
-      transaction { add(R.id.main_fragment, BoardFragment(), BoardFragment.TAG) }
+      transaction { replace(R.id.main_fragment, BoardFragment(), BoardFragment.TAG) }
     }
   }
 
-  class NewGameViewModel : ViewModel() {
-    var boardSize = 19
-  }
+
+}
+
+class NewGameViewModel : ViewModel() {
+  var boardSize = 19
 }

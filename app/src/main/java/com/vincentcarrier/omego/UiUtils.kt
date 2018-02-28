@@ -57,7 +57,7 @@ operator fun RectF.get(i: Int): Float {
 fun Fragment.toast(message: String) = activity?.toast(message)
 
 fun Fragment.transaction(transactionBody: FragmentTransaction.() -> FragmentTransaction) {
-  fragmentManager?.beginTransaction()?.transactionBody()?.commit()
+  fragmentManager!!.beginTransaction().transactionBody().commit()
 }
 
 fun AppCompatActivity.transaction(transactionBody: FragmentTransaction.() -> FragmentTransaction) {
