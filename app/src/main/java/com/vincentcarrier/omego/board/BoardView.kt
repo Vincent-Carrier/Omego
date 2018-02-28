@@ -34,7 +34,7 @@ internal class BoardView : View {
       : super(ctx, attr, defStyleAttr, defStyleRes)
 
   companion object {
-    private const val MIN_ZOOM = 1f
+    private const val MIN_ZOOM = 1.5f
     private const val MAX_ZOOM = 2f
   }
 

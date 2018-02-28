@@ -44,7 +44,9 @@ class Game internal constructor(
   val blackPlayer = Player(blackPlayerType, BLACK)
   val whitePlayer = Player(whitePlayerType, WHITE)
 
-  val activePlayer get() = if (history.size % 2 == 0) blackPlayer else whitePlayer
+  val activePlayer
+    get() = if (history.size % 2 == 0) blackPlayer else whitePlayer
+
   val activePlayerIsHuman get() = activePlayer.type == HUMAN
 
   private val history = History()

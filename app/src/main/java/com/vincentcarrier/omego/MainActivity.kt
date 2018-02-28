@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Window.FEATURE_NO_TITLE
 import android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
 import com.vincentcarrier.model.Game
+import com.vincentcarrier.omego.board.BoardFragment
+import com.vincentcarrier.omego.newgame.NewGameFragment
 
 
 class MainActivity : AppCompatActivity() {
@@ -24,11 +26,14 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     enterFullscreen()
     setContentView(R.layout.activity_main)
+    if (vm.game == null) {
+      transaction { replace(R.id.fragment_container, NewGameFragment(), NewGameFragment.TAG) }
+    } else {
+      transaction { replace(R.id.fragment_container, BoardFragment(), BoardFragment.TAG) }
+    }
   }
-
-
 }
 
 class MainViewModel : ViewModel() {
-  internal lateinit var game: Game
+  internal var game: Game? = null
 }

@@ -21,10 +21,6 @@ class NewGameFragment : Fragment() {
     const val TAG = "NEW_GAME"
   }
 
-  init {
-    retainInstance = true
-  }
-
   val vm by lazy {
     ViewModelProviders.of(this).get(NewGameViewModel::class.java)
   }
@@ -47,7 +43,7 @@ class NewGameFragment : Fragment() {
 
     startGameButton.setOnClickListener {
       mainVm.game = Game(vm.boardSize)
-      transaction { replace(R.id.main_fragment, BoardFragment(), BoardFragment.TAG) }
+      transaction { replace(R.id.fragment_container, BoardFragment(), BoardFragment.TAG) }
     }
   }
 

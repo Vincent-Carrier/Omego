@@ -20,10 +20,6 @@ class BoardFragment : Fragment() {
     const val TAG = "BOARD"
   }
 
-  init {
-    retainInstance = true
-  }
-
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View {
     return inflater.inflate(R.layout.fragment_board, container, false)
   }
@@ -31,10 +27,11 @@ class BoardFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     fun setUpBoardView() {
       with(boardView) {
-        board = mainVm.game.board
+        val game = mainVm.game!!
+        board = game.board
         onBoardTouched = { coordinate ->
-          if (mainVm.game.activePlayerIsHuman) {
-            val legality = mainVm.game.submitMove(coordinate)
+          if (game.activePlayerIsHuman) {
+            val legality = game.submitMove(coordinate)
             when (legality) {
               OUTSIDE -> toast("Outside the board")
               OCCUPIED -> toast("Occupied")
@@ -43,8 +40,7 @@ class BoardFragment : Fragment() {
             }
             legality == LEGAL
           } else false
-      }
-
+        }
       }
     }
 
