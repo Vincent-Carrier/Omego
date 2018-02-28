@@ -4,8 +4,12 @@ import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.Window.FEATURE_NO_TITLE
-import android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
+import android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
+import android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+import android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+import android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 import com.vincentcarrier.model.Game
 import com.vincentcarrier.omego.board.BoardFragment
 import com.vincentcarrier.omego.newgame.NewGameFragment
@@ -19,8 +23,12 @@ class MainActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     fun enterFullscreen() {
-      requestWindowFeature(FEATURE_NO_TITLE)
-      window.setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN)
+      window.decorView.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_STABLE or
+      SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+      SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+      SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+      SYSTEM_UI_FLAG_FULLSCREEN or
+      SYSTEM_UI_FLAG_IMMERSIVE_STICKY
     }
 
     super.onCreate(savedInstanceState)

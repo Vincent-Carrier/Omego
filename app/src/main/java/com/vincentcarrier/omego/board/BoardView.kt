@@ -102,6 +102,8 @@ internal class BoardView : View {
     gridSpacing = gridRect.width() / (board.size - 1)
     stoneRadius = 0.4f * gridSpacing
     setZoomLevel(max(width, height) / min(width, height).toFloat())
+    pivotX = 0f
+    pivotY = 0f
   }
 
   @SuppressLint("ClickableViewAccessibility")
